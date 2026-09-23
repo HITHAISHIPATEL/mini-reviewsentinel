@@ -4,9 +4,11 @@
 
 A deterministic HIGH/CRITICAL finding yields `REJECTED`, even if the LLM says LOW risk or returns no finding. The static checks cover a narrow set of recognizable patterns and are deliberately treated as hard evidence for these cases. If static analysis has no high-severity finding but the LLM reports an issue, the result is at least `REVIEW_REQUIRED`; an LLM-only concern does not automatically reject code. This favors human review over either ignoring a contextual warning or treating a probabilistic claim as established fact. Medium/low static findings and analysis errors also require review.
 
-## B. LLM failure
+## B. LLM failure and provider choice
 
-The LLM is optional. If no key is configured, review continues in static-only mode and reports `llm_status: not_configured`. If a request times out, the provider fails, or output is malformed, the error is recorded in `llm_status`; deterministic findings and the final decision still work. Static-only `APPROVED` means only that the implemented deterministic checks found no issue; it is reduced-coverage approval, not a claim that all vulnerabilities were ruled out.
+The contextual-review path is implemented through an OpenAI-compatible chat-completions adapter. It was live-tested with local Ollama using the `llama3.2` model; the successful report had `llm_status: ok` and `context_retries: 1`. Ollama runs on the developer's machine, so no hosted-model API key is needed. The adapter requires a nonempty key field; for Ollama the value `ollama` is a compatibility placeholder ignored by its local endpoint.
+
+If no provider is configured, review continues in static-only mode and reports `llm_status: not_configured`. If a request times out, the provider fails, or output is malformed, the error is recorded in `llm_status`; deterministic findings are retained and the application does not crash. The request timeout is bounded at 120 seconds to accommodate local model startup/inference. Static-only `APPROVED` means only that implemented deterministic checks found no issue; it is reduced-coverage approval, not proof that all vulnerabilities were ruled out.
 
 ## C. LLM output validation
 

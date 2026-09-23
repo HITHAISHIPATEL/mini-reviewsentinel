@@ -1,8 +1,8 @@
 # Captured test and demo outputs
 
-These are actual outputs from the submitted CLI/tests after running them locally in the project directory. Examples use `--static-only`, so they do not depend on an API key.
+These outputs were produced by the submitted implementation. Static-only examples and the unit suite do not require a model; the Ollama smoke test below is a separate live local-model run.
 
-## Test 1 — true SQL interpolation, hard-coded secret, and eval
+## Test 1 — interpolated SQL, hard-coded secret, and eval
 
 Command: `python -m app.cli examples/vulnerable.py --static-only`
 
@@ -40,9 +40,29 @@ LLM: not_configured; context retries: 0
 Command: `python -m unittest discover -v`
 
 ```text
-Ran 17 tests in 0.006s
+Ran 17 tests in 0.019s
 
 OK
 ```
 
-The exact duration varies by machine. The unit tests exercise these outputs and failure paths against the submitted implementation; tests do not call an external model.
+The exact duration varies by machine. The tests use a fake reviewer and cover static checks, both conflict directions, prompt injection, malformed model data, fallback, retry termination, parse failures, repeatability, and CLI JSON. They do not call a live model.
+
+## Live LLM smoke test — local Ollama
+
+Ollama was configured as the OpenAI-compatible local endpoint with model `llama3.2`; the command was run without `--static-only`:
+
+```text
+python -m app.cli examples/vulnerable.py --json
+```
+
+Actual report fields included:
+
+```json
+{
+  "context_retries": 1,
+  "decision": "REJECTED",
+  "llm_status": "ok"
+}
+```
+
+The complete report retained the deterministic HIGH findings for the sample secret, SQL injection, and `eval()`. The successful LLM response did not override them. Ollama runs locally; `ollama` is the adapter's placeholder key, not a hosted API credential.

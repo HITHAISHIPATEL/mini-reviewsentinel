@@ -15,7 +15,7 @@ class LLMError(RuntimeError):
 class OpenAICompatibleReviewer:
     """Minimal OpenAI-compatible chat-completions adapter using stdlib urllib."""
     def __init__(self, api_key: str | None = None, model: str | None = None,
-                 endpoint: str | None = None, timeout: float = 12.0):
+                 endpoint: str | None = None, timeout: float = 120.0):
         self.api_key = api_key or os.getenv("REVIEW_SENTINEL_API_KEY")
         self.model = model or os.getenv("REVIEW_SENTINEL_MODEL", "gpt-4o-mini")
         self.endpoint = endpoint or os.getenv("REVIEW_SENTINEL_ENDPOINT", "https://api.openai.com/v1/chat/completions")
